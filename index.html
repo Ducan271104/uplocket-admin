@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uplocket Master Admin Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#080c14',
+                        sidebarBg: '#0d1322',
+                        cardBg: '#141c2f',
+                        cardHover: '#1c273e',
+                        accentBlue: '#3b82f6',
+                        accentPurple: '#8b5cf6',
+                        accentPink: '#ec4899',
+                        adminRed: '#ef4444',
+                        navActive: '#1d2942'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #080c14;
+            color: #f3f4f6;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080c14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        .admin-badge-glow {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.35);
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden bg-darkBg text-slate-100 select-none">
+
+    <!-- Toast Notification Box -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-all duration-300 opacity-0 bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastMsg" class="text-sm font-medium">Thông báo hệ thống</span>
+    </div>
+
+    <!-- Mobile Overlay backdrop -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/75 z-30 hidden lg:hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-[285px] bg-sidebarBg border-r border-slate-800/80 flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div>
+            <!-- Header Logo & Role Indicator -->
+            <div class="p-4 flex items-center justify-between border-b border-slate-800/80">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-600 via-red-500 to-amber-500 p-0.5 shadow-lg shadow-rose-600/30 flex items-center justify-center">
+                        <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
+                            <i class="fa-solid fa-shield-halved text-rose-500 text-lg"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h1 class="font-extrabold text-base tracking-tight text-white leading-tight">Uplocket</h1>
+                            <span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[9px] font-bold px-1.5 py-0.2 rounded uppercase">Admin</span>
+                        </div>
+                        <p class="text-[11px] font-medium text-slate-400">Hệ thống quản trị Master</p>
+                    </div>
+                </div>
+                <button title="Chuyển sang xem giao diện CTV" onclick="toggleRoleView()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors">
+                    <i class="fa-solid fa-right-left text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Role Badge Banner -->
+            <div class="mx-3 my-3 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-rose-950/60 to-red-900/30 border border-rose-800/40 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                    </span>
+                    <span class="text-xs font-semibold text-rose-200">System Admin Control</span>
+                </div>
+                <span class="text-[10px] bg-rose-500 text-white font-bold px-2 py-0.5 rounded-full">v2.5</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="px-3 space-y-1 overflow-y-auto max-h-[calc(100vh-220px)]">
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 pt-2 pb-1">Báo cáo & Quản lý</div>
+                
+                <button onclick="switchTab('overview')" id="nav-overview" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-white bg-navActive border border-slate-700/50">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-chart-line text-rose-400 w-5 text-center text-base"></i>
+                        <span>Tổng quan Admin</span>
+                    </div>
+                </button>
+
+                <button onclick="switchTab('resellers')" id="nav-resellers" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-users-gear text-slate-400 w-5 text-center text-base"></i>
+                        <span>Quản lý CTV & User</span>
+                    </div>
+                    <span class="bg-blue-500/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded-full" id="totalResellerBadge">142</span>
+                </button>
+
+                <button onclick="switchTab('activations')" id="nav-activations" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-bolt text-slate-400 w-5 text-center text-base"></i>
+                        <span>Duyệt kích hoạt</span>
+                    </div>
+                    <span class="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full" id="pendingActivationBadge">3</span>
+                </button>
+
+                <button onclick="switchTab('transactions')" id="nav-transactions" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-receipt text-slate-400 w-5 text-center text-base"></i>
+                        <span>Duyệt nạp lượt</span>
+                    </div>
+                    <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full" id="pendingDepositBadge">2</span>
+                </button>
+
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 pt-3 pb-1">Cấu hình & Giá</div>
+
+                <button onclick="switchTab('pricing-config')" id="nav-pricing-config" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
+                    <i class="fa-solid fa-tags text-slate-400 w-5 text-center text-base"></i>
+                    <span>Giá sỉ & Hoa hồng</span>
+                </button>
+
+                <button onclick="switchTab('system-config')" id="nav-system-config" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
+                    <i class="fa-solid fa-sliders text-slate-400 w-5 text-center text-base"></i>
+                    <span>Cấu hình hệ thống</span>
+                </button>
+
+                <button onclick="switchTab('api-logs')" id="nav-api-logs" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
+                    <i class="fa-solid fa-code text-slate-400 w-5 text-center text-base"></i>
+                    <span>Master API Keys</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Admin Profile Info -->
+        <div class="p-3 m-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="relative flex-shrink-0">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" 
+                         alt="Admin Avatar" class="w-10 h-10 rounded-xl object-cover ring-2 ring-rose-500">
+                    <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-rose-500 border-2 border-slate-900 rounded-full flex items-center justify-center text-[7px] text-white">
+                        <i class="fa-solid fa-crown"></i>
+                    </span>
+                </div>
+                <div class="truncate">
+                    <h4 class="text-xs font-bold text-white truncate flex items-center gap-1">
+                        Nguyen Duc An
+                    </h4>
+                    <p class="text-[10px] text-rose-400 font-medium truncate">Root Administrator</p>
+                </div>
+            </div>
+            <button onclick="showToast('Đã đăng xuất khỏi phiên Admin')" class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition-colors">
+                <i class="fa-solid fa-power-off text-xs"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden">
+        
+        <!-- Top Navigation Header -->
+        <header class="h-16 border-b border-slate-800/80 bg-sidebarBg/70 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden text-slate-300 hover:text-white p-2 rounded-lg bg-slate-800/60">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="flex items-center gap-3">
+                    <h2 id="pageTitle" class="text-lg font-bold text-white">Tổng quan Admin</h2>
+                    <span class="hidden sm:inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-semibold">
+                        <i class="fa-solid fa-shield-virus text-xs"></i> Master System Mode
+                    </span>
+                </div>
+            </div>
+
+            <!-- Top Right Action Controls -->
+            <div class="flex items-center gap-3">
+                <!-- System Status Indicator -->
+                <div class="hidden md:flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-slate-400">Server API:</span>
+                    <span class="text-emerald-400 font-semibold">Online (99.9%)</span>
+                </div>
+
+                <!-- Add New Reseller Quick Button -->
+                <button onclick="openAddResellerModal()" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shadow-md shadow-rose-600/25 flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-xs"></i>
+                    <span class="hidden sm:inline">Thêm CTV Mới</span>
+                </button>
+
+                <!-- System Refresh -->
+                <button onclick="refreshData()" title="Làm mới dữ liệu" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors">
+                    <i class="fa-solid fa-rotate-right text-base"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Body Scrollable Content -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6">
+
+            <!-- TAB 1: TỔNG QUAN ADMIN (ADMIN OVERVIEW) -->
+            <section id="tab-overview" class="tab-content space-y-6">
+                <!-- Top Metric Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <!-- Metric 1: Total Revenue -->
+                    <div class="p-5 rounded-2xl bg-cardBg border border-slate-800/80 hover:border-slate-700 transition-all shadow-lg relative overflow-hidden">
+                        <div class="flex items-center justify-between text-slate-400 mb-3">
+                            <span class="text-xs font-semibold uppercase tracking-wider">Tổng Doanh Thu Hệ Thống</span>
+                            <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <i class="fa-solid fa-sack-dollar text-base"></i>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-black text-white mb-1">128.450.000 <span class="text-xs text-slate-400 font-normal">đ</span></div>
+                        <p class="text-xs text-emerald-400 flex items-center gap-1 font-medium">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +24% so với tháng trước
+                        </p>
+                    </div>
+
+                    <!-- Metric 2: Total Resellers -->
+                    <div class="p-5 rounded-2xl bg-cardBg border border-slate-800/80 hover:border-slate-700 transition-all shadow-lg">
+                        <div class="flex items-center justify-between text-slate-400 mb-3">
+                            <span class="text-xs font-semibold uppercase tracking-wider">Tổng Đại Lý / CTV</span>
+                            <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                                <i class="fa-solid fa-users text-base"></i>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-black text-white mb-1">142 <span class="text-xs text-slate-400 font-normal">thành viên</span></div>
+                        <p class="text-xs text-blue-400 flex items-center gap-1 font-medium">
+                            <i class="fa-solid fa-user-plus"></i> +12 CTV mới tuần này
+                        </p>
+                    </div>
+
+                    <!-- Metric 3: Total Issued Credits -->
+                    <div class="p-5 rounded-2xl bg-cardBg border border-slate-800/80 hover:border-slate-700 transition-all shadow-lg">
+                        <div class="flex items-center justify-between text-slate-400 mb-3">
+                            <span class="text-xs font-semibold uppercase tracking-wider">Tổng Lượt Đã Cấp</span>
+                            <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                                <i class="fa-solid fa-coins text-base"></i>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-black text-white mb-1">8.650 <span class="text-xs text-slate-400 font-normal">lượt</span></div>
+                        <p class="text-xs text-slate-400">Đã dùng: <span class="text-amber-400 font-semibold">6.210 lượt</span></p>
+                    </div>
+
+                    <!-- Metric 4: Total Activations -->
+                    <div class="p-5 rounded-2xl bg-cardBg border border-slate-800/80 hover:border-slate-700 transition-all shadow-lg">
+                        <div class="flex items-center justify-between text-slate-400 mb-3">
+                            <span class="text-xs font-semibold uppercase tracking-wider">Khách Đã Kích Hoạt</span>
+                            <div class="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                                <i class="fa-solid fa-bolt text-base"></i>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-black text-white mb-1">5.420 <span class="text-xs text-slate-400 font-normal">tài khoản</span></div>
+                        <p class="text-xs text-emerald-400 font-medium">Tỷ lệ thành công 99.8%</p>
+                    </div>
+                </div>
+
+                <!-- Growth Graph Simulation & Quick Actions Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Chart Panel -->
+                    <div class="lg:col-span-2 p-6 rounded-2xl bg-cardBg border border-slate-800/80 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-base font-bold text-white">Biểu đồ doanh thu & lượt kích hoạt 2026</h3>
+                                <p class="text-xs text-slate-400">Thống kê dữ liệu phát sinh toàn hệ thống</p>
+                            </div>
+                            <select class="bg-slate-900 border border-slate-700 text-xs text-slate-300 rounded-xl px-3 py-1.5 focus:outline-none">
+                                <option>Tháng này</option>
+                                <option>Quý 1 / 2026</option>
+                                <option>Năm nay</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Visual Mock Bar Chart -->
+                        <div class="h-56 flex items-end justify-between gap-3 pt-6 border-b border-slate-800/80 pb-3 px-2">
+                            <div class="w-full bg-slate-900 rounded-lg h-full flex flex-col justify-end p-1 hover:bg-slate-800/60 transition-all group relative">
+                                <div class="bg-rose-500/80 rounded-md w-full transition-all group-hover:bg-rose-400" style="height: 40%"></div>
+                                <span class="text-[10px] text-center text-slate-500 mt-2">Thg 1</span>
+                            </div>
+                            <div class="w-full bg-slate-900 rounded-lg h-full flex flex-col justify-end p-1 hover:bg-slate-800/60 transition-all group relative">
+                                <div class="bg-rose-500/80 rounded-md w-full transition-all group-hover:bg-rose-400" style="height: 55%"></div>
+                                <span class="text-[10px] text-center text-slate-500 mt-2">Thg 2</span>
+                            </div>
+                            <div class="w-full bg-slate-900 rounded-lg h-full flex flex-col justify-end p-1 hover:bg-slate-800/60 transition-all group relative">
+                                <div class="bg-rose-500/80 rounded-md w-full transition-all group-hover:bg-rose-400" style="height: 70%"></div>
+                                <span class="text-[10px] text-center text-slate-500 mt-2">Thg 3</span>
+                            </div>
+                            <div class="w-full bg-slate-900 rounded-lg h-full flex flex-col justify-end p-1 hover:bg-slate-800/60 transition-all group relative">
+                                <div class="bg-rose-500/80 rounded-md w-full transition-all group-hover:bg-rose-400" style="height: 60%"></div>
+                                <span class="text-[10px] text-center text-slate-500 mt-2">Thg 4</span>
+                            </div>
+                            <div class="w-full bg-slate-900 rounded-lg h-full flex flex-col justify-end p-1 hover:bg-slate-800/60 transition-all group relative">
+                                <div class="bg-rose-500/80 rounded-md w-full transition-all group-hover:bg-rose-400" style="height: 85%"></div>
+                                <span class="text-[10px] text-center text-slate-500 mt-2">Thg 5</span>
+                            </div>
+                            <div class="w-full bg-slate-900 rounded-lg h-full flex flex-col justify-end p-1 hover:bg-slate-800/60 transition-all group relative">
+                                <div class="bg-gradient-to-t from-rose-600 to-amber-500 rounded-md w-full transition-all shadow-lg shadow-rose-500/20" style="height: 100%"></div>
+                                <span class="text-[10px] font-bold text-center text-rose-400 mt-2">Hiện tại</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-3 text-xs text-slate-400">
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-rose-500 inline-block"></span> Doanh thu nạp lượt</span>
+                            <span>Trung bình: <b>21.4M / tháng</b></span>
+                        </div>
+                    </div>
+
+                    <!-- Admin Quick Tasks -->
+                    <div class="p-6 rounded-2xl bg-cardBg border border-slate-800/80 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-1">Tác vụ cần xử lý ngay</h3>
+                            <p class="text-xs text-slate-400 mb-4">Các yêu cầu từ cộng tác viên đang chờ Admin duyệt.</p>
+
+                            <div class="space-y-3">
+                                <div onclick="switchTab('transactions')" class="p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/40 cursor-pointer transition-all flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs font-bold">2</div>
+                                        <div>
+                                            <p class="text-xs font-bold text-white">Yêu cầu nạp tiền QR</p>
+                                            <p class="text-[11px] text-slate-400">Tổng giá trị: 3.650.000đ</p>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+                                </div>
+
+                                <div onclick="switchTab('activations')" class="p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/40 cursor-pointer transition-all flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs font-bold">3</div>
+                                        <div>
+                                            <p class="text-xs font-bold text-white">Đơn kích hoạt chờ duyệt</p>
+                                            <p class="text-[11px] text-slate-400">Kích hoạt gói 1 Năm Locket</p>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-800">
+                            <button onclick="openCreditAdjustmentModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>Cộng / Trừ lượt trực tiếp cho CTV</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: QUẢN LÝ CTV & USER (RESELLER MANAGEMENT) -->
+            <section id="tab-resellers" class="tab-content hidden space-y-4">
+                <div class="p-4 rounded-2xl bg-cardBg border border-slate-800/80 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <!-- Search Input -->
+                    <div class="relative w-full sm:w-80">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="searchResellerInput" oninput="filterResellers()" placeholder="Tìm theo tên, email, SĐT..." 
+                               class="w-full bg-slate-900 border border-slate-700/70 rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500">
+                    </div>
+
+                    <!-- Role Filter -->
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <select id="roleFilter" onchange="filterResellers()" class="bg-slate-900 border border-slate-700/70 text-slate-300 text-xs rounded-xl py-2 px-3 focus:outline-none">
+                            <option value="all">Tất cả vai trò</option>
+                            <option value="Master Admin">Master Admin</option>
+                            <option value="Reseller VIP">Reseller VIP</option>
+                            <option value="CTV Basic">CTV Basic</option>
+                        </select>
+                        <button onclick="openAddResellerModal()" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap">
+                            <i class="fa-solid fa-plus"></i> Thêm CTV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resellers Data Table -->
+                <div class="rounded-2xl bg-cardBg border border-slate-800/80 overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/80 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3.5 px-4">Thành viên</th>
+                                    <th class="py-3.5 px-4">Phân cấp vai trò</th>
+                                    <th class="py-3.5 px-4">Số lượt còn dư</th>
+                                    <th class="py-3.5 px-4">Đã kích hoạt</th>
+                                    <th class="py-3.5 px-4">Trạng thái</th>
+                                    <th class="py-3.5 px-4 text-right">Thao tác Admin</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/60 text-xs" id="resellerTableBody">
+                                <!-- Dynamic JS Output -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: DUYỆT KÍCH HOẠT (ACTIVATION QUEUE) -->
+            <section id="tab-activations" class="tab-content hidden space-y-4">
+                <div class="p-4 rounded-2xl bg-cardBg border border-slate-800/80">
+                    <h3 class="text-base font-bold text-white mb-1">Danh sách chờ duyệt kích hoạt tài khoản</h3>
+                    <p class="text-xs text-slate-400">Kiểm tra và xác nhận kích hoạt tính năng cho người dùng Locket từ CTV.</p>
+                </div>
+
+                <div class="rounded-2xl bg-cardBg border border-slate-800/80 overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/80 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3.5 px-4">CTV Yêu cầu</th>
+                                    <th class="py-3.5 px-4">Email / UID Khách</th>
+                                    <th class="py-3.5 px-4">Gói kích hoạt</th>
+                                    <th class="py-3.5 px-4">Thời gian</th>
+                                    <th class="py-3.5 px-4">Trạng thái</th>
+                                    <th class="py-3.5 px-4 text-right">Duyệt Đơn</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/60 text-xs" id="activationQueueBody">
+                                <!-- Dynamic JS Output -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: DUYỆT NẠP LƯỢT (TRANSACTION LOGS) -->
+            <section id="tab-transactions" class="tab-content hidden space-y-4">
+                <div class="p-4 rounded-2xl bg-cardBg border border-slate-800/80">
+                    <h3 class="text-base font-bold text-white mb-1">Yêu cầu nạp tiền & lượt giao dịch</h3>
+                    <p class="text-xs text-slate-400">Kiểm tra tiền về tài khoản ngân hàng và cộng lượt cho CTV.</p>
+                </div>
+
+                <div class="rounded-2xl bg-cardBg border border-slate-800/80 overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/80 border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3.5 px-4">Mã GD</th>
+                                    <th class="py-3.5 px-4">CTV Nạp</th>
+                                    <th class="py-3.5 px-4">Số tiền</th>
+                                    <th class="py-3.5 px-4">Số lượt quy đổi</th>
+                                    <th class="py-3.5 px-4">Phương thức</th>
+                                    <th class="py-3.5 px-4 text-right">Thao tác Admin</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/60 text-xs" id="transactionQueueBody">
+                                <!-- Dynamic JS Output -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: BẢNG GIÁ & HOA HỒNG CONFIG -->
+            <section id="tab-pricing-config" class="tab-content hidden space-y-6 max-w-4xl">
+                <div class="p-6 rounded-2xl bg-cardBg border border-slate-800/80 space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Cấu hình Bảng Giá Sỉ & Chiết Khấu</h3>
+                        <p class="text-xs text-slate-400 mt-1">Điều chỉnh giá mua lượt tối thiểu cho từng cấp độ đại lý.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Basic CTV -->
+                        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                            <div>
+                                <span class="text-xs font-bold text-white">CTV Basic</span>
+                                <p class="text-[10px] text-slate-400">Cấp độ mặc định ban đầu</p>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 uppercase">Đơn giá/lượt (VNĐ)</label>
+                                <input type="number" value="20000" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 uppercase">Chiết khấu (%)</label>
+                                <input type="number" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Reseller VIP -->
+                        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                            <div>
+                                <span class="text-xs font-bold text-blue-400">Reseller VIP</span>
+                                <p class="text-[10px] text-slate-400">Nạp từ 50 lượt trở lên</p>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 uppercase">Đơn giá/lượt (VNĐ)</label>
+                                <input type="number" value="17000" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 uppercase">Chiết khấu (%)</label>
+                                <input type="number" value="15" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Master Dealer -->
+                        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                            <div>
+                                <span class="text-xs font-bold text-purple-400">Đại Lý Master</span>
+                                <p class="text-[10px] text-slate-400">Nạp từ 200 lượt trở lên</p>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 uppercase">Đơn giá/lượt (VNĐ)</label>
+                                <input type="number" value="14000" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 uppercase">Chiết khấu (%)</label>
+                                <input type="number" value="30" class="w-full bg-slate-950 border border-slate-700 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="showToast('Đã lưu cấu hình bảng giá mới!')" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs px-6 py-2.5 rounded-xl transition-all">
+                            Lưu Cấu Hình Giá
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: CẤU HÌNH HỆ THỐNG (SYSTEM CONFIG) -->
+            <section id="tab-system-config" class="tab-content hidden space-y-6 max-w-4xl">
+                <div class="p-6 rounded-2xl bg-cardBg border border-slate-800/80 space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Bảo Mật & Thông Báo Hệ Thống</h3>
+                        <p class="text-xs text-slate-400 mt-1">Cài đặt các tham số máy chủ và thông báo chung toàn trang.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Thông báo chạy trên Dashboard CTV</label>
+                            <input type="text" value="Hệ thống tự động kích hoạt Locket Gold 24/7. Chúc các CTV nổ đơn rực rỡ!" 
+                                   class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-4 text-xs text-white focus:outline-none focus:border-rose-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Ngân Hàng Nhận Tiền Tự Động (VietQR)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input type="text" placeholder="Tên Ngân Hàng (VD: MBBank)" value="MBBank" class="bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-4 text-xs text-white">
+                                <input type="text" placeholder="Số Tài Khoản" value="9999888899" class="bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-4 text-xs text-white">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-slate-900 rounded-xl border border-slate-800">
+                            <div>
+                                <h4 class="text-xs font-bold text-white">Bảo trì hệ thống kích hoạt tự động</h4>
+                                <p class="text-[10px] text-slate-400">Tạm dừng nhận đơn kích hoạt tự động từ CTV</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button onclick="showToast('Đã cập nhật cấu hình hệ thống!')" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs px-6 py-2.5 rounded-xl transition-all">
+                            Cập Nhật Cài Đặt
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 7: MASTER API KEYS -->
+            <section id="tab-api-logs" class="tab-content hidden space-y-6">
+                <div class="p-6 rounded-2xl bg-cardBg border border-slate-800/80 space-y-4">
+                    <h3 class="text-lg font-bold text-white">Quản Lý Master API Key</h3>
+                    <p class="text-xs text-slate-400">API Root cấp quyền cho các đại lý tạo kết nối server-to-server.</p>
+
+                    <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-rose-400">Master Secret Token</span>
+                            <p class="font-mono text-xs text-slate-200 mt-1">sk_live_master_uplocket_998877665544332211</p>
+                        </div>
+                        <button onclick="copyText('sk_live_master_uplocket_998877665544332211')" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-1.5 rounded-lg">Sao chép</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL 1: THÊM CTV MỚI (ADD RESELLER MODAL) -->
+    <div id="addResellerModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-cardBg border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+            <button onclick="closeAddResellerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-left">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-rose-500"></i> Thêm Cộng Tác Viên Mới
+                </h3>
+                <p class="text-xs text-slate-400 mt-1">Cấp tài khoản đại lý hoặc CTV trực tiếp vào hệ thống</p>
+            </div>
+
+            <form onsubmit="handleAddReseller(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold uppercase text-slate-300 mb-1">Họ & Tên</label>
+                    <input type="text" id="newResellerName" required placeholder="Ví dụ: Trần Văn Nam" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500">
+                </div>
+
+                <div>
+                    <label class="block font-semibold uppercase text-slate-300 mb-1">Email đăng nhập</label>
+                    <input type="email" id="newResellerEmail" required placeholder="vannam@gmail.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-3 text-white focus:outline-none focus:border-rose-500">
+                </div>
+
+                <div>
+                    <label class="block font-semibold uppercase text-slate-300 mb-1">Phân Cấp Vai Trò</label>
+                    <select id="newResellerRole" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-3 text-white focus:outline-none">
+                        <option value="CTV Basic">CTV Basic</option>
+                        <option value="Reseller VIP">Reseller VIP</option>
+                        <option value="Master Admin">Master Admin</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold uppercase text-slate-300 mb-1">Cấp Số Lượt Ban Đầu</label>
+                    <input type="number" id="newResellerCredits" value="50" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-3 text-white focus:outline-none">
+                </div>
+
+                <button type="submit" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-rose-600/30">
+                    Tạo Tài Khoản CTV
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CỘNG/TRỪ LƯỢT TRỰC TIẾP (CREDIT ADJUSTMENT) -->
+    <div id="creditAdjustModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-cardBg border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+            <button onclick="closeCreditAdjustModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div>
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-coins text-amber-400"></i> Cộng / Trừ Lượt CTV
+                </h3>
+                <p class="text-xs text-slate-400 mt-1">Thay đổi số dư lượt kích hoạt thủ công cho tài khoản đại lý</p>
+            </div>
+
+            <form onsubmit="handleCreditAdjust(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold uppercase text-slate-300 mb-1">Chọn CTV</label>
+                    <select id="adjustResellerSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-3 text-white focus:outline-none">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold uppercase text-slate-300 mb-1">Hành động</label>
+                        <select id="adjustAction" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-3 text-white focus:outline-none">
+                            <option value="add">Cộng (+) Lượt</option>
+                            <option value="subtract">Trừ (-) Lượt</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold uppercase text-slate-300 mb-1">Số lượt</label>
+                        <input type="number" id="adjustAmount" value="10" min="1" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-3 text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold uppercase text-slate-300 mb-1">Lý do điều chỉnh</label>
+                    <input type="text" id="adjustReason" placeholder="Ví dụ: Thưởng thành tích bán hàng" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2.5 px-3 text-white focus:outline-none">
+                </div>
+
+                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-amber-600/30">
+                    Xác Nhận Điều Chỉnh
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT MASTER LOGIC -->
+    <script>
+        // Initial Admin Data State
+        let resellersData = [
+            { id: 1, name: 'Nguyen Duc An', email: 'nguyenan8dtg@gmail.com', role: 'Master Admin', credits: 250, activatedCount: 142, status: 'Active' },
+            { id: 2, name: 'Trần Minh Tuấn', email: 'tuanreseller@gmail.com', role: 'Reseller VIP', credits: 85, activatedCount: 64, status: 'Active' },
+            { id: 3, name: 'Lê Hoàng Anh', email: 'hoanganh_ctv@yahoo.com', role: 'CTV Basic', credits: 12, activatedCount: 9, status: 'Active' },
+            { id: 4, name: 'Phạm Thị Ngọc', email: 'ngocpham99@gmail.com', role: 'CTV Basic', credits: 0, activatedCount: 2, status: 'Locked' }
+        ];
+
+        let activationQueue = [
+            { id: 'ACT-901', reseller: 'Trần Minh Tuấn', target: 'user_locket_88@gmail.com', plan: '1 Năm Locket Gold', date: '10 phút trước', status: 'Pending' },
+            { id: 'ACT-902', reseller: 'Lê Hoàng Anh', target: 'kimgia_102', plan: '6 Tháng VIP', date: '35 phút trước', status: 'Pending' },
+            { id: 'ACT-903', reseller: 'Nguyen Duc An', target: 'vannam_test@gmail.com', plan: '1 Tháng Basic', date: '1 giờ trước', status: 'Pending' }
+        ];
+
+        let transactionQueue = [
+            { id: 'TX-8821', reseller: 'Trần Minh Tuấn', amount: '850.000 VNĐ', credits: 50, method: 'VietQR MBBank', status: 'Pending' },
+            { id: 'TX-8822', reseller: 'Lê Hoàng Anh', amount: '200.000 VNĐ', credits: 10, method: 'MoMo QR', status: 'Pending' }
+        ];
+
+        // Page Init
+        window.onload = function() {
+            renderResellerTable();
+            renderActivationQueue();
+            renderTransactionQueue();
+            populateResellerSelect();
+        };
+
+        // Navigation Tab Switcher
+        function switchTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(el => el.classList.add('hidden'));
+
+            const targetTab = document.getElementById('tab-' + tabId);
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+            }
+
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('bg-navActive', 'text-white', 'border', 'border-slate-700/50');
+                item.classList.add('text-slate-400');
+            });
+
+            const activeBtn = document.getElementById('nav-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-navActive', 'text-white', 'border', 'border-slate-700/50');
+                activeBtn.classList.remove('text-slate-400');
+            }
+
+            const pageTitles = {
+                'overview': 'Tổng quan Admin',
+                'resellers': 'Quản lý Cộng tác viên & User',
+                'activations': 'Duyệt Đơn Kích Hoạt',
+                'transactions': 'Duyệt Nạp Lượt & Giao Dịch',
+                'pricing-config': 'Cấu Hình Giá Sỉ & Chiết Khấu',
+                'system-config': 'Bảo Mật & Cài Đặt Máy Chủ',
+                'api-logs': 'Master API Key Management'
+            };
+            document.getElementById('pageTitle').innerText = pageTitles[tabId] || 'Admin Panel';
+
+            // Close mobile menu if open
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar.classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+        }
+
+        // Toggle Mobile Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+
+        // Render Resellers Table
+        function renderResellerTable(data = resellersData) {
+            const tbody = document.getElementById('resellerTableBody');
+            document.getElementById('totalResellerBadge').innerText = resellersData.length;
+
+            tbody.innerHTML = data.map(item => `
+                <tr class="hover:bg-slate-800/30 transition-colors">
+                    <td class="py-3.5 px-4">
+                        <div class="font-bold text-white">${item.name}</div>
+                        <div class="text-[10px] text-slate-400">${item.email}</div>
+                    </td>
+                    <td class="py-3.5 px-4">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            item.role === 'Master Admin' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                            item.role === 'Reseller VIP' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                            'bg-slate-700/40 text-slate-300'
+                        }">
+                            ${item.role}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-4 font-bold text-amber-400">${item.credits} lượt</td>
+                    <td class="py-3.5 px-4 text-slate-300 font-medium">${item.activatedCount} khách</td>
+                    <td class="py-3.5 px-4">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
+                            ${item.status === 'Active' ? 'Hoạt động' : 'Đã khóa'}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right space-x-1">
+                        <button onclick="toggleLockReseller(${item.id})" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 ${item.status === 'Active' ? 'text-rose-400' : 'text-emerald-400'}" title="${item.status === 'Active' ? 'Khóa tài khoản' : 'Mở khóa'}">
+                            <i class="fa-solid ${item.status === 'Active' ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Activation Queue
+        function renderActivationQueue() {
+            const tbody = document.getElementById('activationQueueBody');
+            document.getElementById('pendingActivationBadge').innerText = activationQueue.length;
+
+            if (activationQueue.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">Không có đơn hàng nào chờ duyệt</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = activationQueue.map((item, index) => `
+                <tr class="hover:bg-slate-800/30">
+                    <td class="py-3 px-4 font-bold text-white">${item.reseller}</td>
+                    <td class="py-3 px-4 text-slate-300 font-mono">${item.target}</td>
+                    <td class="py-3 px-4 text-amber-400 font-semibold">${item.plan}</td>
+                    <td class="py-3 px-4 text-slate-400">${item.date}</td>
+                    <td class="py-3 px-4"><span class="bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded text-[10px] font-semibold">Chờ duyệt</span></td>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        <button onclick="approveActivation(${index})" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] px-3 py-1 rounded-lg">Duyệt</button>
+                        <button onclick="rejectActivation(${index})" class="bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white font-semibold text-[11px] px-2.5 py-1 rounded-lg">Từ chối</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Transaction Queue
+        function renderTransactionQueue() {
+            const tbody = document.getElementById('transactionQueueBody');
+            document.getElementById('pendingDepositBadge').innerText = transactionQueue.length;
+
+            if (transactionQueue.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">Không có yêu cầu nạp tiền nào</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = transactionQueue.map((item, index) => `
+                <tr class="hover:bg-slate-800/30">
+                    <td class="py-3 px-4 font-mono font-bold text-rose-400">${item.id}</td>
+                    <td class="py-3 px-4 font-bold text-white">${item.reseller}</td>
+                    <td class="py-3 px-4 text-emerald-400 font-bold">${item.amount}</td>
+                    <td class="py-3 px-4 text-amber-400 font-bold">+${item.credits} lượt</td>
+                    <td class="py-3 px-4 text-slate-400">${item.method}</td>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        <button onclick="approveTransaction(${index})" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] px-3 py-1 rounded-lg">Xác nhận đã nhận tiền</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Approve Activation
+        function approveActivation(index) {
+            const item = activationQueue[index];
+            activationQueue.splice(index, 1);
+            renderActivationQueue();
+            showToast(`Đã duyệt kích hoạt thành công đơn hàng cho ${item.target}!`);
+        }
+
+        function rejectActivation(index) {
+            activationQueue.splice(index, 1);
+            renderActivationQueue();
+            showToast('Đã từ chối đơn kích hoạt!', 'error');
+        }
+
+        // Approve Transaction
+        function approveTransaction(index) {
+            const tx = transactionQueue[index];
+            // Find reseller and add credits
+            const targetReseller = resellersData.find(r => r.name === tx.reseller);
+            if (targetReseller) {
+                targetReseller.credits += tx.credits;
+            }
+            transactionQueue.splice(index, 1);
+            renderTransactionQueue();
+            renderResellerTable();
+            showToast(`Đã xác nhận thanh toán! Cộng +${tx.credits} lượt cho ${tx.reseller}.`);
+        }
+
+        // Filter Resellers
+        function filterResellers() {
+            const query = document.getElementById('searchResellerInput').value.toLowerCase();
+            const role = document.getElementById('roleFilter').value;
+
+            const filtered = resellersData.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(query) || item.email.toLowerCase().includes(query);
+                const matchesRole = role === 'all' || item.role === role;
+                return matchesSearch && matchesRole;
+            });
+
+            renderResellerTable(filtered);
+        }
+
+        // Add Reseller Form
+        function openAddResellerModal() {
+            document.getElementById('addResellerModal').classList.remove('hidden');
+        }
+        function closeAddResellerModal() {
+            document.getElementById('addResellerModal').classList.add('hidden');
+        }
+
+        function handleAddReseller(e) {
+            e.preventDefault();
+            const name = document.getElementById('newResellerName').value;
+            const email = document.getElementById('newResellerEmail').value;
+            const role = document.getElementById('newResellerRole').value;
+            const credits = parseInt(document.getElementById('newResellerCredits').value);
+
+            const newReseller = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                role: role,
+                credits: credits,
+                activatedCount: 0,
+                status: 'Active'
+            };
+
+            resellersData.unshift(newReseller);
+            renderResellerTable();
+            populateResellerSelect();
+            closeAddResellerModal();
+            showToast(`Đã tạo thành công CTV mới: ${name}`);
+        }
+
+        // Credit Adjust Modal
+        function openCreditAdjustmentModal() {
+            document.getElementById('creditAdjustModal').classList.remove('hidden');
+        }
+        function closeCreditAdjustModal() {
+            document.getElementById('creditAdjustModal').classList.add('hidden');
+        }
+
+        function populateResellerSelect() {
+            const select = document.getElementById('adjustResellerSelect');
+            select.innerHTML = resellersData.map(r => `<option value="${r.id}">${r.name} (${r.email}) - Đang có: ${r.credits} lượt</option>`).join('');
+        }
+
+        function handleCreditAdjust(e) {
+            e.preventDefault();
+            const resId = parseInt(document.getElementById('adjustResellerSelect').value);
+            const action = document.getElementById('adjustAction').value;
+            const amount = parseInt(document.getElementById('adjustAmount').value);
+
+            const reseller = resellersData.find(r => r.id === resId);
+            if (reseller) {
+                if (action === 'add') {
+                    reseller.credits += amount;
+                    showToast(`Đã cộng +${amount} lượt cho ${reseller.name}`);
+                } else {
+                    reseller.credits = Math.max(0, reseller.credits - amount);
+                    showToast(`Đã trừ -${amount} lượt của ${reseller.name}`, 'error');
+                }
+                renderResellerTable();
+            }
+            closeCreditAdjustModal();
+        }
+
+        // Lock / Unlock Reseller Account
+        function toggleLockReseller(id) {
+            const reseller = resellersData.find(r => r.id === id);
+            if (reseller) {
+                reseller.status = reseller.status === 'Active' ? 'Locked' : 'Active';
+                renderResellerTable();
+                showToast(`Đã ${reseller.status === 'Active' ? 'mở khóa' : 'khóa'} tài khoản ${reseller.name}`);
+            }
+        }
+
+        // Toggle View Mode Notification
+        function toggleRoleView() {
+            showToast('Đang chuyển đổi giữa Admin View & Reseller View...');
+        }
+
+        function refreshData() {
+            showToast('Đã làm mới toàn bộ dữ liệu máy chủ!');
+        }
+
+        // Copy Text Helper (Standard Document ExecCommand for compatibility)
+        function copyText(text) {
+            const temp = document.createElement('input');
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast('Đã sao chép khóa API!');
+        }
+
+        // Toast Helper
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = message;
+            toastIcon.className = type === 'error' ? 'fa-solid fa-circle-xmark text-rose-400 text-lg' : 'fa-solid fa-circle-check text-emerald-400 text-lg';
+
+            toast.classList.remove('translate-x-full', 'opacity-0');
+            toast.classList.add('translate-x-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0', 'opacity-100');
+                toast.classList.add('translate-x-full', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
